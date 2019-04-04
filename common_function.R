@@ -330,3 +330,80 @@ round2 <- function(x, digits) {
   z = z / 10^digits
   return(z * posneg)
 }
+#' @title
+#' ConstAssignenvironment
+#' @description
+#' Define an unmodifiable variable
+#' @param
+#' x : Variable name to define
+#' value : The value to define
+#' e : environment
+#' @return
+#' Variable to define
+#' @examples
+#' ConstAssign("FOO", 1)
+ConstAssign <- function(x, value, e=.GlobalEnv){
+  if (!exists(x)) {
+    assign(x, value, envir=e)
+    lockBinding(x, e)
+  }
+}
+#' @title
+#' CreateDataFrame
+#' @description
+#' Create a data frame
+#' @param
+#' col_names : Data frame column name
+#' row_count : Number of rows of data frame, Default 0
+#' @return
+#' data frame
+#' @examples
+#' CreateDataFrame(c("a", "b", "c"), 4)
+#' CreateDataFrame(c("aaa", "bbb", "ccc"))
+CreateDataFrame <- function(col_names, row_count=0){
+  col_count <- length(col_names)
+  if (row_count == 0) {
+    temp_row_count <- 1
+  } else {
+    temp_row_count <- row_count
+  }
+  df <- data.frame(matrix(rep(NA, col_count * temp_row_count), ncol=col_count, nrow=temp_row_count))
+  colnames(df) <- col_names
+  if (row_count == 0) {
+    df <- df[numeric(0), ]
+  }
+  return(df)
+}
+#' @title
+#' ConvertCsvName
+#' @description
+#' Edit and return input string
+#' @param
+#' csv_name : input_string
+#' @return
+#' string without date and hyphen from input string
+ConvertCsvName <- function(csv_name){
+  temp_name <- stringr::str_replace(csv_name, pattern="_[0-9]{6}_[0-9]{4}.csv", replacement="")
+  temp_name <- stringr::str_replace(temp_name, pattern="-", replacement="_")
+  return(temp_name)
+}
+#' @title
+#' OutputDF
+#' @description
+#' Output csv and R_dataframe
+#' @param
+#' df : dataframe name
+#' output_csv_path : output "*.csv" path
+#' output_rda_path : output "*.Rda" path
+#' output_csv_fileEncoding : Encoding of the output file
+#' output_csv_eol : Line feed code of output file
+#' @return
+#' No return value
+#' @examples
+#' OutputDF("dssexdiag", here("R", "output", ""), here("R", "output", ""))
+OutputDF <- function(df, output_csv_path, output_rda_path, output_csv_fileEncoding="cp932", output_csv_eol="\r\n"){
+  # Output csv and R_dataframe
+  write.csv(get(df), paste0(output_csv_path, df, ".csv"), na='""', row.names=F,
+            fileEncoding=output_csv_fileEncoding, eol=output_csv_eol)
+  save(list=df, file=(paste0(output_rda_path, df, ".Rda")))
+}
